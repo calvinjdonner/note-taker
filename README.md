@@ -1,11 +1,11 @@
 <h1> Note Taker 📝</h1>
   
-<p align='center'>
+<p>
   <img src='https://img.shields.io/github/languages/top/calvinjdonner/note-taker' />
   <img src='https://img.shields.io/github/repo-size/calvinjdonner/note-taker' />
 </p>
 
-<p align='center'>
+<p>
     <img src='https://img.shields.io/badge/-Express.js-blue' />
 </p>
      
