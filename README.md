@@ -1,4 +1,4 @@
-<h1 align='center'> Note Taker 📝</h1>
+<h1> Note Taker 📝</h1>
   
 <p align='center'>
   <img src='https://img.shields.io/github/languages/top/calvinjdonner/note-taker' />
