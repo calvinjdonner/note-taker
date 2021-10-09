@@ -6,7 +6,6 @@
 </p>
 
 <p align='center'>
-    <img src='https://img.shields.io/badge/-node.js-red' />
     <img src='https://img.shields.io/badge/-Express.js-blue' />
 </p>
      
