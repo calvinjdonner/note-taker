@@ -1,61 +1,63 @@
 const express = require('express');
-const PORT = process.env.PORT || 3001;
+const { writeFile, readFile } = require('fs');
 const app = express();
-const { note } = require('./db/db.json');
-
-const util = require('util');
-const fs = require('fs');
-const uuid = require('uuid').v1;
-
-const readFileAsync = util.promisify(fs.readFile);
-const writeFileAsync = util.promisify(fs.writeFile);
-
-app.use(express.urlencoded({ extended: true }));
+const PORT = process.env.PORT || 3001;
+const path = require('path')
+app.use(express.urlencoded({extended: true}))
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static('public'))
 
-app.use('/api', apiRoutes);
-app.use('/', htmlRoutes);
-
-app.listen(PORT, () => {
-    console.log(`API server now on port ${PORT}!`);
+// Get routes
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
-class Server {
-    read() {
-        return readFileAsync('db/db.json', 'utf8')
-    }
-    write(note) {
-        return writeFileAsync('db/db.json', JSON.stringify(note))
-    }
+app.get('/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/notes.html'));
+});
 
-    addNote(note) {
-        const { title, text } = note
+app.get('/api/notes', (req, res) => {
+    res.sendFile(path.join(__dirname, './db/db.json'));
+});
 
-        if(!title || !text) {
-            throw new Error('Title and Text cannot be empty')
-        }
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, './public/index.html'));
+});
 
-        const newNote = { title, text, id: uuid() }
+// Post routes
+app.post('/api/notes/', (req, res) => {
+    const newNote = req.body;
 
-        return this.getNotes()
-            .then(notes => [...notes, newNote])
-            .then(updatedNotes => this.write(updatedNotes))
-            .then(() => this.newNote)
-    }
+    readFile('./db/db.json', 'utf8', (err, data) => {
+        if(err) throw err
+        const noteArry = JSON.parse(data)
+        
+        newNote.id = noteArry.length.toString();
+        noteArry.push(newNote)
+        writeFile('./db/db.json', JSON.stringify(noteArry), () => {
+            console.log('success')
+            res.json(newNote);
+        })
+    })
+});
 
-    getNotes() {
-        return this.read()
-            .then(notes => {
-                return JSON.parse(notes) || [];
-            })
-    }
-    removeNote(id) {
-        return this.getNotes()
-            .then(notes => notes.filter(note => note.id !== id))
-            .then(keptNotes => this.write(keptNotes))
-    }
-}
+// Deletes notes
+app.delete('/api/notes/:id', (req, res) => {
+    req.params.id
+    readFile('./db/db.json', 'utf8', (err, data) => {
+        if (err) throw err
+        const notes = JSON.parse(data)
+        const filteredNotes = notes.filter(note => {
+            return req.params.id !== note.id
+        })
+        writeFile('./db/db.json', JSON.stringify(filteredNotes), () => {
+            console.log('success')
+            res.json(filteredNotes)
+        })
+    })
+})
 
-module.exports = new Server();
-
+// Starts server
+app.listen(PORT, () => {
+console.log(`API server now on port ${PORT}!`);
+})
